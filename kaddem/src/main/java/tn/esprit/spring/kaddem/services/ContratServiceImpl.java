@@ -2,7 +2,6 @@ package tn.esprit.spring.kaddem.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import lombok.extern.slf4j.Slf4j;
 import tn.esprit.spring.kaddem.entities.Contrat;
 import tn.esprit.spring.kaddem.entities.Etudiant;
@@ -10,106 +9,111 @@ import tn.esprit.spring.kaddem.entities.Specialite;
 import tn.esprit.spring.kaddem.repositories.ContratRepository;
 import tn.esprit.spring.kaddem.repositories.EtudiantRepository;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Service
-public class ContratServiceImpl implements IContratService{
-@Autowired
-ContratRepository contratRepository;
-@Autowired
-	EtudiantRepository etudiantRepository;
-	public List<Contrat> retrieveAllContrats(){
-		return (List<Contrat>) contratRepository.findAll();
+public class ContratServiceImpl implements IContratService {
+	private final ContratRepository contratRepository;
+	private final EtudiantRepository etudiantRepository;
+
+	@Autowired
+	public ContratServiceImpl(ContratRepository contratRepository, EtudiantRepository etudiantRepository) {
+		this.contratRepository = contratRepository;
+		this.etudiantRepository = etudiantRepository;
 	}
 
-	public Contrat updateContrat (Contrat  ce){
+	@Override
+	public List<Contrat> retrieveAllContrats() {
+		return contratRepository.findAll();
+	}
+
+	@Override
+	public Contrat updateContrat(Contrat ce) {
+		return contratRepository.findById(ce.getIdContrat())
+				.map(existingContrat -> {
+					existingContrat.setDateDebutContrat(ce.getDateDebutContrat());
+					existingContrat.setDateFinContrat(ce.getDateFinContrat());
+					existingContrat.setMontantContrat(ce.getMontantContrat());
+					existingContrat.setSpecialite(ce.getSpecialite());
+					existingContrat.setArchive(ce.getArchive());
+					return contratRepository.save(existingContrat);
+				}).orElse(null);
+	}
+
+	@Override
+	public Contrat addContrat(Contrat ce) {
 		return contratRepository.save(ce);
 	}
 
-	public  Contrat addContrat (Contrat ce){
-		return contratRepository.save(ce);
-	}
-
-	public Contrat retrieveContrat (Integer  idContrat){
+	@Override
+	public Contrat retrieveContrat(Integer idContrat) {
 		return contratRepository.findById(idContrat).orElse(null);
 	}
 
-	public  void removeContrat(Integer idContrat){
-		Contrat c=retrieveContrat(idContrat);
-		contratRepository.delete(c);
+	@Override
+	public void removeContrat(Integer idContrat) {
+		contratRepository.findById(idContrat).ifPresent(contratRepository::delete);
 	}
 
+	@Override
+	public Contrat affectContratToEtudiant(Integer idContrat, String nomE, String prenomE) {
+		Etudiant e = etudiantRepository.findByNomEAndPrenomE(nomE, prenomE);
+		Contrat ce = contratRepository.findByIdContrat(idContrat);
+		long nbContratsActifs = e.getContrats().stream().filter(Contrat::getArchive).count();
 
-
-	public Contrat affectContratToEtudiant (Integer idContrat, String nomE, String prenomE){
-		Etudiant e=etudiantRepository.findByNomEAndPrenomE(nomE, prenomE);
-		Contrat ce=contratRepository.findByIdContrat(idContrat);
-		Set<Contrat> contrats= e.getContrats();
-		Integer nbContratssActifs=0;
-		if (contrats.size()!=0) {
-			for (Contrat contrat : contrats) {
-				if (((contrat.getArchive())!=null)&& ((contrat.getArchive())!=false))  {
-					nbContratssActifs++;
-				}
-			}
+		if (nbContratsActifs < 5) {
+			ce.setEtudiant(e);
+			contratRepository.save(ce);
 		}
-		if (nbContratssActifs<=4){
-		ce.setEtudiant(e);
-		contratRepository.save(ce);}
+
 		return ce;
 	}
-	public 	Integer nbContratsValides(Date startDate, Date endDate){
+
+	@Override
+	public Integer nbContratsValides(Date startDate, Date endDate) {
 		return contratRepository.getnbContratsValides(startDate, endDate);
 	}
 
-	public void retrieveAndUpdateStatusContrat(){
-		List<Contrat>contrats=contratRepository.findAll();
-		List<Contrat>contrats15j=null;
-		List<Contrat>contratsAarchiver=null;
+	@Override
+	public void retrieveAndUpdateStatusContrat() {
+		Date dateSysteme = new Date();
+		List<Contrat> contrats = contratRepository.findAll();
+
 		for (Contrat contrat : contrats) {
-			Date dateSysteme = new Date();
-			if (contrat.getArchive()==false) {
-				long difference_In_Time = dateSysteme.getTime() - contrat.getDateFinContrat().getTime();
-				long difference_In_Days = (difference_In_Time / (1000 * 60 * 60 * 24)) % 365;
-				if (difference_In_Days==15){
-					contrats15j.add(contrat);
-					log.info(" Contrat : " + contrat);
+			if (!contrat.getArchive()) {
+				long differenceInDays = (dateSysteme.getTime() - contrat.getDateFinContrat().getTime()) / (1000 * 60 * 60 * 24);
+
+				if (differenceInDays == 15) {
+					log.info("Contrat à échéance de 15 jours : {}", contrat);
 				}
-				if (difference_In_Days==0) {
-					contratsAarchiver.add(contrat);
+
+				if (differenceInDays == 0) {
 					contrat.setArchive(true);
 					contratRepository.save(contrat);
 				}
 			}
 		}
 	}
-	public float getChiffreAffaireEntreDeuxDates(Date startDate, Date endDate){
-		float difference_In_Time = endDate.getTime() - startDate.getTime();
-		float difference_In_Days = (difference_In_Time / (1000 * 60 * 60 * 24)) % 365;
-		float difference_In_months =difference_In_Days/30;
-        List<Contrat> contrats=contratRepository.findAll();
-		float chiffreAffaireEntreDeuxDates=0;
-		for (Contrat contrat : contrats) {
-			if (contrat.getSpecialite()== Specialite.IA){
-				chiffreAffaireEntreDeuxDates+=(difference_In_months*300);
-			} else if (contrat.getSpecialite()== Specialite.CLOUD) {
-				chiffreAffaireEntreDeuxDates+=(difference_In_months*400);
-			}
-			else if (contrat.getSpecialite()== Specialite.RESEAUX) {
-				chiffreAffaireEntreDeuxDates+=(difference_In_months*350);
-			}
-			else //if (contrat.getSpecialite()== Specialite.SECURITE)
-			 {
-				 chiffreAffaireEntreDeuxDates+=(difference_In_months*450);
-			}
-		}
-		return chiffreAffaireEntreDeuxDates;
 
+	@Override
+	public float getChiffreAffaireEntreDeuxDates(Date startDate, Date endDate) {
+		long differenceInDays = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+		float differenceInMonths = differenceInDays / 30f;
 
+		Map<Specialite, Float> tarifs = Map.of(
+				Specialite.IA, 300f,
+				Specialite.CLOUD, 400f,
+				Specialite.RESEAUX, 350f
+		);
+
+		return contratRepository.findAll().stream()
+				.map(contrat -> differenceInMonths * tarifs.getOrDefault(contrat.getSpecialite(), 450f))
+				.reduce(0f, Float::sum);
 	}
 
-
+	@Override
+	public int getNbContratsValides() {
+		return contratRepository.countByValide(true);
+	}
 }

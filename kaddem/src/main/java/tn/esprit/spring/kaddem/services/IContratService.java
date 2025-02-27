@@ -23,5 +23,9 @@ public interface IContratService {
     public float getChiffreAffaireEntreDeuxDates(Date startDate, Date endDate);
 
     public void retrieveAndUpdateStatusContrat();
+
+    int getNbContratsValides();
+
+
 }
 

@@ -25,7 +25,7 @@ public class Contrat implements Serializable{
     private Etudiant etudiant;
 
     public Contrat() {
-        // TODO Auto-generated constructor stub
+
     }
 
     public Contrat(Date dateDebutContrat, Date dateFinContrat, Specialite specialite, Boolean archive,
@@ -38,16 +38,13 @@ public class Contrat implements Serializable{
         this.montantContrat = montantContrat;
     }
 
-    public Contrat(Integer idContrat, Date dateDebutContrat, Date dateFinContrat, Specialite specialite,
-                   Boolean archive, Integer montantContrat) {
-        super();
-        this.idContrat = idContrat;
-        this.dateDebutContrat = dateDebutContrat;
-        this.dateFinContrat = dateFinContrat;
-        this.specialite = specialite;
-        this.archive = archive;
-        this.montantContrat = montantContrat;
+    public Contrat(Specialite specialite) {
+        // Ce constructeur est réservé pour une implémentation future.
+        // Actuellement, il ne remplit pas tous les champs nécessaires.
+        throw new UnsupportedOperationException("Ce constructeur n'est pas encore implémenté.");
     }
+
+
 
     public Integer getIdContrat() {
         return idContrat;
@@ -93,6 +90,5 @@ public class Contrat implements Serializable{
     public void setEtudiant(Etudiant etudiant) {
         this.etudiant = etudiant;
     }
-
 
 }

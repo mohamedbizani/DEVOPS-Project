@@ -17,7 +17,6 @@ public class Departement implements Serializable{
     @JsonIgnore
     private Set<Etudiant> etudiants;
     public Departement() {
-        // TODO Auto-generated constructor stub
     }
 
     public Departement(String nomDepart) {
@@ -51,5 +50,6 @@ public class Departement implements Serializable{
     public void setNomDepart(String nomDepart) {
         this.nomDepart = nomDepart;
     }
+
 
 }

@@ -1,0 +1,19 @@
+pipeline {
+    agent any
+
+
+
+    stages {
+        stage('Git') {
+            steps {
+                git branch: 'main', credentialsId: 'github', url: 'https://github.com/mohamedbizani/DEVOPS-Project.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'mvn clean compile'
+            }
+        }
+        }
+        }
