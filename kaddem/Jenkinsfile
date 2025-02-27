@@ -17,13 +17,15 @@ pipeline {
                }
            }
        }
-       stage('SonarQube Analysis') {
-                   steps {
-                       dir('kaddem') {
-                           sh 'mvn sonar:sonar -Dsonar.projectKey=DEVOPS-Project -Dsonar.host.url=http://192.168.33.10:9000 -Dsonar.login=sonarqube'
-                       }
-                   }
-               }
+      stage('SonarQube Analysis') {
+          steps {
+              withSonarQubeEnv('sonarqube') {
+                  withCredentials([string(credentialsId: 'Sonarq', variable: 'SONAR_TOKEN')]) {
+                      sh 'mvn sonar:sonar -Dsonar.token=$SONAR_TOKEN'
+                  }
+              }
+          }
+      }
 
 
 
