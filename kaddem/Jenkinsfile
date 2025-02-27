@@ -20,7 +20,7 @@ pipeline {
        stage('SonarQube Analysis') {
                    steps {
                        dir('kaddem') {
-                           sh 'mvn sonar:sonar -Dsonar.projectKey=DEVOPS-Project -Dsonar.host.url=http://192.168.33.10:9000 -Dsonar.login=jenkins-sonar'
+                           sh 'mvn sonar:sonar -Dsonar.projectKey=DEVOPS-Project -Dsonar.host.url=http://192.168.33.10:9000 -Dsonar.login=sonarqube'
                        }
                    }
                }
