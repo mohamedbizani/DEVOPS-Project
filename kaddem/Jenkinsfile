@@ -19,19 +19,8 @@ pipeline {
        }
        stage('SonarQube Analysis') {
            steps {
-               script {
-                   def scannerHome = tool 'sonarqube'
-                   withSonarQubeEnv('sonarqube') {
-                       sh """
-                           ${scannerHome}/bin/sonar-scanner \\
-                           -Dsonar.projectKey=DEVOPS-Project \\
-                           -Dsonar.sources=kaddem/src/main/java/tn/esprit/spring/kaddem \\
-                           -Dsonar.tests=kaddem/src/test/java/tn/esprit/spring/kaddem \\
-                           -Dsonar.java.binaries=target/classes \\
-                           -Dsonar.junit.reportsPath=target/surefire-reports \\
-                           -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
-                       """
-                   }
+               withSonarQubeEnv('sonarqube') {
+                   sh 'mvn sonar:sonar'
                }
            }
        }
