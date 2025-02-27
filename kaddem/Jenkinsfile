@@ -25,7 +25,8 @@ pipeline {
                        sh """
                            ${scannerHome}/bin/sonar-scanner \\
                            -Dsonar.projectKey=DEVOPS-Project \\
-                           -Dsonar.sources=src/main/java \\
+                           -Dsonar.sources=src/main/java/tn/esprit/spring/kaddem \\
+                           -Dsonar.tests=src/test/java/tn/esprit/spring/kaddem \\
                            -Dsonar.java.binaries=target/classes \\
                            -Dsonar.junit.reportsPath=target/surefire-reports \\
                            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
@@ -34,6 +35,7 @@ pipeline {
                }
            }
        }
+
 
 
         }
