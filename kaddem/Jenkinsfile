@@ -19,9 +19,11 @@ pipeline {
        }
       stage('SonarQube Analysis') {
           steps {
-              withSonarQubeEnv('sonarqube') {
-                  withCredentials([string(credentialsId: 'Sonarq', variable: 'SONAR_TOKEN')]) {
-                      sh 'mvn sonar:sonar -Dsonar.token=$SONAR_TOKEN'
+              dir('kaddem') {  // Exécute les commandes dans le répertoire 'kaddem'
+                  withSonarQubeEnv('sonarqube') {
+                      withCredentials([string(credentialsId: 'Sonarq', variable: 'SONAR_TOKEN')]) {
+                          sh 'mvn sonar:sonar -Dsonar.token=$SONAR_TOKEN'
+                      }
                   }
               }
           }
