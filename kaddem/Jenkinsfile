@@ -10,10 +10,13 @@ pipeline {
             }
         }
 
-        stage('Build') {
-            steps {
-                sh 'mvn clean compile'
-            }
-        }
+       stage('Build') {
+           steps {
+               dir('kaddem') {  // Exécute la commande Maven dans le bon dossier
+                   sh 'mvn clean compile'
+               }
+           }
+       }
+
         }
         }
