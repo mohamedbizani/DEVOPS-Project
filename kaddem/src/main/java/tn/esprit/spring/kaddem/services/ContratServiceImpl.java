@@ -81,7 +81,7 @@ public class ContratServiceImpl implements IContratService {
 		List<Contrat> contrats = contratRepository.findAll();
 
 		for (Contrat contrat : contrats) {
-			if (!contrat.getArchive()) {
+			if (!Boolean.TRUE.equals(contrat.getArchive())) {
 				long differenceInDays = (dateSysteme.getTime() - contrat.getDateFinContrat().getTime()) / (1000 * 60 * 60 * 24);
 
 				if (differenceInDays == 15) {
